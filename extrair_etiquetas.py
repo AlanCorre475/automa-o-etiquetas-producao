@@ -5,7 +5,7 @@ import sys
 
 import pdfplumber
 
-PREFIXOS_IGNORADOS = ("TSEC","TSHI","TSIM",)
+PREFIXOS_IGNORADOS = ("TEST1","TEST2","TEST3",)
 
 def extrair_dados_pdf(caminho_pdf):
 
@@ -45,22 +45,22 @@ def extrair_dados_pdf(caminho_pdf):
     return registros
 
 
-CTRAB_RLINE = "RLINE"
-CTRAB_SEPARA_RIC = "710102"  
+CTRAB_CCC = "CCC"
+CTRAB_SEPARA_RIC = "9999"  
 
 def separar_por_marca(registros):
-    rhodes = []
-    ricco = []
-    rline = []
+    aaa = []
+    bbb = []
+    ccc = []
     for r in registros:
         ctrab = r["ctrab"].strip().upper()
-        if ctrab == CTRAB_RLINE:
-            rline.append(r)
+        if ctrab == CTRAB_CCC:
+            ccc.append(r)
         elif ctrab == CTRAB_SEPARA_RIC and r["produto"].upper().startswith("RIC"):
-            ricco.append(r)
+            bbb.append(r)
         else:
-            rhodes.append(r)
-    return rhodes, ricco, rline
+            aaa.append(r)
+    return aaa, bbb, ccc
 
 ETIQUETAS_POR_LINHA = 8 
 
@@ -104,13 +104,13 @@ if __name__ == "__main__":
     caminho_pdf = sys.argv[1]
 
     dados = extrair_dados_pdf(caminho_pdf)
-    rhodes, ricco, rline = separar_por_marca(dados)
+    aaa, bbb, ccc = separar_por_marca(dados)
 
     pasta_saida = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saidas")
     os.makedirs(pasta_saida, exist_ok = True)
-    saidas = [("RHODES", rhodes, os.path.join(pasta_saida, "saida_rhodes.csv")),
-        ("RICCO ", ricco, os.path.join(pasta_saida, "saida_ricco.csv")),
-        ("RLINE ", rline, os.path.join(pasta_saida, "saida_rline.csv"))]
+    saidas = [("AAA", aaa, os.path.join(pasta_saida, "saida_aaa.csv")),
+        ("BBB ", bbb, os.path.join(pasta_saida, "saida_bbb.csv")),
+        ("CCC ", ccc, os.path.join(pasta_saida, "saida_ccc.csv"))]
 
     print(f"\n{len(dados)} ordem(ns) de producao lida(s) no total\n")
     for nome, grupo, arquivo in saidas:
