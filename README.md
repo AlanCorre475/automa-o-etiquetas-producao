@@ -29,3 +29,6 @@ Resultado: o processo que levava de 30 a 50 minutos agora é concluído em cerca
 - MasterPrint
 
 
+## Observação
+
+Projeto criado para uso interno. Os códigos e nomes de marcas do script são exemplos fictícios, e nenhum dado real foi incluído
