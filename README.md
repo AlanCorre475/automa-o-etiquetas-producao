@@ -4,9 +4,9 @@ Script em Python que automatiza a geração de etiquetas de ordens de produção
 
 ## Por que eu fiz
 
-Trabalho no PCP e percebi um gasto grande de etiquetas: pelo menos 2 caixas por mês (R$ 285,60 cada), porque pedidos pequenos usavam quase uma folha inteira. Além disso, a digitação manual gerava erros de código e de OP, o que causava retrabalho, pois era preciso procurar a OP de novo no sistema.
+Trabalho no PCP e percebi um gasto elevado de etiquetas, pois muitos pedidos pequenos utilizavam quase uma folha inteira. Antes da implantação do script, o consumo era de pelo menos 2 caixas de etiquetas por mês, com custo de R$ 285,60 por caixa, além da ocorrência frequente de erros de digitação de códigos e números de OP, que geravam retrabalho devido à necessidade de localizar novamente as ordens no sistema.
 
-Com o script, os erros de digitação praticamente deixaram de existir (cerca de 99%). Ainda pode acontecer da produção perder etiquetas, mas isso foi raro: só 2 vezes nos últimos 3 meses.
+Com a implementação do script, houve uma redução significativa no consumo de etiquetas, que passou para aproximadamente 1 caixa a cada 2 ou 3 meses, representando uma economia superior a 80%. Além disso, os erros de digitação foram praticamente eliminados, com uma redução estimada em 99%, aumentando a confiabilidade e a agilidade do processo.
 
 ## O problema
 
@@ -27,6 +27,4 @@ O script lê o PDF com as ordens de produção, junta várias OPs e calcula as e
 5. No MasterPrint, os CSVs são importados
 
 ## Extra
-Trabalho no PCP e percebi um gasto grande de etiquetas: eram usadas de 2 a 3 caixas a cada 2 meses, porque pedidos pequenos usavam quase uma folha inteira. Além disso, a digitação manual gerava erros de código e de OP, o que causava retrabalho, pois era preciso procurar a OP de novo no sistema.
-
-Com o script, o consumo caiu para cerca de 1 caixa a cada 2-3 meses (mais da metade de redução) e os erros de digitação praticamente deixaram de existir (cerca de 99%). Ainda pode acontecer da produção perder etiquetas, mas isso foi raro: só 2 vezes nos últimos 3 meses.
+Ainda existe a possibilidade de perda de etiquetas pela produção, porém esse tipo de ocorrência tornou-se raro, sendo registrados apenas 2 casos nos últimos 3 meses. Dessa forma, a solução trouxe ganhos expressivos tanto na redução de custos quanto na diminuição de retrabalho e aumento da eficiência operacional
