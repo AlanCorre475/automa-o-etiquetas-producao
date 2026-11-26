@@ -1,30 +1,155 @@
-# Automação de etiquetas de ordens de produção
+# 🏷️ Automação de etiquetas de ordens de produção
 
-Script em Python que automatiza a geração de etiquetas de ordens de produção (OP).
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
+![pdfplumber](https://img.shields.io/badge/pdfplumber-PDF-informational)
+![Status](https://img.shields.io/badge/status-em%20uso%20na%20produção-brightgreen)
+[![Testes](https://github.com/AlanCorre475/automa-o-etiquetas-producao/actions/workflows/testes.yml/badge.svg)](https://github.com/AlanCorre475/automa-o-etiquetas-producao/actions/workflows/testes.yml)
 
-## Por que eu fiz
+Script em Python que lê o PDF das ordens de produção (OP), junta várias OPs em uma única impressão e gera os arquivos CSV prontos para o software de etiquetas (MasterPrint).
 
-Trabalho no PCP e percebi um gasto elevado de etiquetas, pois muitos pedidos pequenos utilizavam quase uma folha inteira. Antes da implantação do script, o consumo era de pelo menos 2 caixas de etiquetas por mês, com custo de R$ 285,60 por caixa, além da ocorrência frequente de erros de digitação de códigos e números de OP, que geravam retrabalho devido à necessidade de localizar novamente as ordens no sistema.
+> Projeto criado e usado no meu dia a dia no PCP (Planejamento e Controle de Produção).
 
-Com a implementação do script, houve uma redução significativa no consumo de etiquetas, que passou para aproximadamente 1 caixa a cada 2 ou 3 meses, representando uma economia superior a 80%. Além disso, os erros de digitação foram praticamente eliminados, com uma redução estimada em 99%, aumentando a confiabilidade e a agilidade do processo.
+---
 
-## O problema
+## 📑 Sumário
+
+- [Resultados](#-resultados)
+- [Por que eu fiz](#-por-que-eu-fiz)
+- [O problema](#-o-problema)
+- [A solução](#-a-solução)
+- [Como funciona](#️-como-funciona)
+- [Tecnologias](#-tecnologias)
+- [Como rodar](#-como-rodar)
+- [Exemplo de saída](#-exemplo-de-saída)
+- [Testes](#-testes)
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Próximos passos](#-próximos-passos)
+- [Autor](#-autor)
+
+---
+
+## 📊 Resultados
+
+| Indicador | Antes | Depois |
+|---|---|---|
+| Tempo para imprimir as etiquetas | 30 a 50 minutos | cerca de 6 cliques |
+| Consumo de etiquetas | 2 caixas por mês | 1 caixa a cada 2 ou 3 meses (**economia acima de 80%**) |
+| Erros de digitação de código/OP | frequentes | redução estimada de **99%** |
+
+## 💡 Por que eu fiz
+
+Trabalho no PCP e percebi um gasto elevado de etiquetas, pois muitos pedidos pequenos usavam quase uma folha inteira. Antes do script, o consumo era de pelo menos 2 caixas de etiquetas por mês, com custo de R$ 285,60 por caixa. Também eram frequentes os erros de digitação de códigos e números de OP, que geravam retrabalho para localizar as ordens de novo no sistema.
+
+## ❌ O problema
 
 A impressão das etiquetas era feita uma OP por vez, de forma manual, e levava de 30 a 50 minutos. Também gerava desperdício: com dois pedidos de 28 etiquetas cada, eram usadas 2 folhas, quando 1 folha seria suficiente.
 
-## A solução
+## ✅ A solução
 
-O script lê o PDF com as ordens de produção, junta várias OPs e calcula as etiquetas necessárias. Depois separa por marca e gera um arquivo CSV para cada uma, pronto para importar no software de impressão de etiquetas (MasterPrint).
+O script lê o PDF com as ordens de produção, junta várias OPs e calcula as etiquetas necessárias. Depois separa por marca e gera um arquivo CSV para cada uma, pronto para importar no MasterPrint.
 
-**Resultado:** o processo que levava de 30 a 50 minutos agora é concluído em cerca de 6 cliques, com menos desperdício de etiqueta.
+Para não misturar OPs na mesma linha da folha, o script completa a última linha de cada OP com etiquetas de "sobra". Assim a próxima OP sempre começa numa linha nova, fácil de destacar.
 
-## Como funciona
+## ⚙️ Como funciona
 
-1. O PDF das ordens de produção é colocado na pasta do script.
-2. O script lê o PDF e identifica as OPs.
-3. As etiquetas são calculadas e separadas por marca.
-4. Os CSVs são gerados na pasta `saidas`.
-5. No MasterPrint, os CSVs são importados
+```
+PDF das OPs  ──►  lê e identifica cada OP  ──►  separa por marca  ──►  gera 1 CSV por marca  ──►  importa no MasterPrint
+```
 
-## Extra
-Ainda existe a possibilidade de perda de etiquetas pela produção, porém esse tipo de ocorrência tornou-se raro, sendo registrados apenas 2 casos nos últimos 3 meses. Dessa forma, a solução trouxe ganhos expressivos tanto na redução de custos quanto na diminuição de retrabalho e aumento da eficiência operacional
+1. O script lê o PDF e encontra cada bloco que começa com **"Ordem de Produção"**.
+2. De cada OP ele pega: número da OP, produto, centro de trabalho, quantidade e descrição.
+3. Pula os produtos que não levam etiqueta (prefixos configurados no início do script).
+4. Separa as OPs por marca (AAA, BBB e CCC).
+5. Repete cada OP pela quantidade de etiquetas e completa a linha com sobras (8 etiquetas por linha).
+6. Salva os CSVs na pasta `saidas/`.
+
+## 🛠 Tecnologias
+
+- **Python 3**
+- **pdfplumber** – leitura do texto do PDF
+- **re** (expressões regulares) – encontrar os campos de cada OP
+- **csv** – gerar os arquivos para o MasterPrint
+
+## ▶️ Como rodar
+
+1. Instale o [Python 3](https://www.python.org/downloads/).
+2. Baixe o projeto:
+   ```bash
+   git clone https://github.com/AlanCorre475/automa-o-etiquetas-producao.git
+   cd automa-o-etiquetas-producao
+   ```
+3. Instale a dependência:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Rode passando o PDF das ordens de produção:
+   ```bash
+   python extrair_etiquetas.py ordens.pdf
+   ```
+5. Os arquivos aparecem na pasta `saidas/`:
+   ```
+   3 ordem(ns) de producao lida(s) no total
+
+   AAA: 1 ordem(ns) -> 16 etiqueta(s) em .../saidas/saida_aaa.csv
+   BBB: 1 ordem(ns) -> 8 etiqueta(s) em .../saidas/saida_bbb.csv
+   CCC: 1 ordem(ns) -> 8 etiqueta(s) em .../saidas/saida_ccc.csv
+   ```
+6. No MasterPrint, importe os CSVs e imprima.
+
+### 🖱️ Jeito mais fácil no Windows
+
+Depois de instalar a dependência (passo 3), é só **arrastar o PDF em cima do arquivo `gerar_etiquetas.bat`**. Ele roda o script e mostra o resultado, sem precisar abrir o terminal.
+
+## 📄 Exemplo de saída
+
+Exemplo com **dados fictícios** (arquivo completo em [`exemplos/saida_aaa_exemplo.csv`](exemplos/saida_aaa_exemplo.csv)). Uma OP de 10 peças gera 10 etiquetas + 6 de sobra, para fechar 2 linhas de 8:
+
+```
+100001;SOF001;10;SOFA 3 LUGARES CINZA;OP 01
+100001;SOF001;10;SOFA 3 LUGARES CINZA;OP 01
+...
+.;.;0;Sobra da OP 01 (SOF001) - a proxima OP comeca na linha de baixo;OP 01 - SOBRA
+```
+
+Colunas: `ordem ; produto ; quantidade ; descricao ; sequencia`
+
+## 🧪 Testes
+
+O projeto tem testes automáticos que conferem a separação por marca e o cálculo das etiquetas (incluindo as sobras). Eles rodam sozinhos no GitHub a cada alteração. Para rodar no seu computador:
+
+```bash
+python -m unittest -v
+```
+
+## 📁 Estrutura do projeto
+
+```
+automa-o-etiquetas-producao/
+├── extrair_etiquetas.py        # script principal
+├── test_extrair_etiquetas.py   # testes automáticos
+├── gerar_etiquetas.bat         # atalho: arraste o PDF em cima (Windows)
+├── requirements.txt            # dependências (pdfplumber)
+├── exemplos/                   # exemplo de CSV gerado (dados fictícios)
+├── .github/workflows/          # roda os testes no GitHub a cada alteração
+├── .gitignore                  # evita subir PDFs reais e a pasta saidas/
+└── README.md
+```
+
+> 🔒 Os nomes das marcas (AAA, BBB, CCC) e os prefixos de produto foram trocados por nomes genéricos para não expor dados da empresa. PDFs reais não são enviados ao repositório.
+
+## 🚀 Próximos passos
+
+- [ ] Ler as configurações (marcas, prefixos) de um arquivo separado, sem precisar mexer no código
+- [ ] Criar um executável (.exe) para usar sem instalar o Python
+- [x] Adicionar testes automáticos
+- [x] Atalho para rodar arrastando o PDF (Windows)
+
+## 👤 Autor
+
+**Alan Correa** – estudante de Análise e Desenvolvimento de Sistemas (Infnet) e Auxiliar de PCP.
+
+[![GitHub](https://img.shields.io/badge/GitHub-AlanCorre475-181717?logo=github)](https://github.com/AlanCorre475)
+
+## 📌 Observação
+
+Ainda pode haver perda de etiquetas pela produção, mas isso ficou raro: apenas 2 casos nos últimos 3 meses. A solução trouxe ganhos tanto na redução de custos quanto na diminuição de retrabalho e no aumento da eficiência.
