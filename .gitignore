@@ -1,0 +1,16 @@
+# Arquivos gerados pelo script
+saidas/
+
+# PDFs reais de ordens de producao (dados da empresa, nao vao para o GitHub)
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/

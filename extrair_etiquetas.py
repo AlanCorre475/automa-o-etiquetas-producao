@@ -5,20 +5,36 @@ import sys
 
 import pdfplumber
 
-PREFIXOS_IGNORADOS = ("TEST1","TEST2","TEST3",)
+# ---------------- CONFIGURACOES ----------------
+
+# Produtos que nao levam etiqueta (comeca com um destes prefixos = pula)
+PREFIXOS_IGNORADOS = ("TEST1", "TEST2", "TEST3")
+
+# Centro de trabalho que vai para a marca CCC
+CTRAB_CCC = "CCC"
+
+# Centro de trabalho que, junto com produto "RIC...", vai para a marca BBB
+CTRAB_SEPARA_RIC = "9999"
+
+# Quantidade de etiquetas em cada linha da folha
+ETIQUETAS_POR_LINHA = 8
+
+# -----------------------------------------------
+
 
 def extrair_dados_pdf(caminho_pdf):
-
     texto_completo = ""
     with pdfplumber.open(caminho_pdf) as pdf:
         for pagina in pdf.pages:
             texto_pagina = pagina.extract_text() or ""
             texto_completo += texto_pagina + "\n"
 
+    # cada OP comeca com o texto "Ordem de Producao"
     blocos = texto_completo.split("Ordem de Produção")[1:]
 
     linha_valores = re.compile(
         r"(\d{6,})\s+(\S+)\s+([\d.,]+)\s+\d{2}/\d{2}/\d{4}\s+\d{2}/\d{2}/\d{4}")
+
     registros = []
     ignorados = 0
     for bloco in blocos:
@@ -29,24 +45,22 @@ def extrair_dados_pdf(caminho_pdf):
         if valores_match and produto_match:
             if produto_match.group(1).upper().startswith(PREFIXOS_IGNORADOS):
                 ignorados += 1
-                continue    
+                continue
             qtd_float = float(valores_match.group(3).replace(",", "."))
             registros.append({
-                    "ordem": valores_match.group(1),
-                    "produto": produto_match.group(1),
-                    "ctrab": valores_match.group(2),
-                    "quantidade": int(round(qtd_float)),
-                    "descricao": desc_match.group(1).strip() if desc_match else ""})
+                "ordem": valores_match.group(1),
+                "produto": produto_match.group(1),
+                "ctrab": valores_match.group(2),
+                "quantidade": int(round(qtd_float)),
+                "descricao": desc_match.group(1).strip() if desc_match else ""})
         else:
             print("[AVISO] bloco ignorado (nao achei todos os campos):")
             print(bloco[:200])
+
     if ignorados:
         print(f"[INFO] {ignorados} OP(s) sem etiqueta puladas ({', '.join(PREFIXOS_IGNORADOS)})")
     return registros
 
-
-CTRAB_CCC = "CCC"
-CTRAB_SEPARA_RIC = "9999"  
 
 def separar_por_marca(registros):
     aaa = []
@@ -62,39 +76,44 @@ def separar_por_marca(registros):
             aaa.append(r)
     return aaa, bbb, ccc
 
-ETIQUETAS_POR_LINHA = 8 
 
 def expandir_por_quantidade(registros):
-    
     expandido = []
     for numero_op, r in enumerate(registros, start=1):
         rotulo_op = f"OP {numero_op:02d}"
 
+        # toda OP gera pelo menos 1 etiqueta, mesmo com quantidade 0
         qtd = max(1, r["quantidade"])
         for _ in range(qtd):
             etiqueta = dict(r)
-            etiqueta["sequencia"] = rotulo_op 
+            etiqueta["sequencia"] = rotulo_op
             expandido.append(etiqueta)
-        resto = (-qtd) % ETIQUETAS_POR_LINHA  
-        for i in range(resto):
-            expandido.append(
-                {   "ordem": ".",
-                    "produto": ".",
-                    "quantidade": 0,
-                    "descricao": (
-                        f"Sobra da {rotulo_op} ({r['produto']}) - "
-                        f"a proxima OP comeca na linha de baixo"),
-                    "sequencia": f"{rotulo_op} - SOBRA"})
+
+        # completa a linha com etiquetas de sobra, para a proxima OP
+        # sempre comecar no inicio de uma linha nova
+        resto = (-qtd) % ETIQUETAS_POR_LINHA
+        for _ in range(resto):
+            expandido.append({
+                "ordem": ".",
+                "produto": ".",
+                "quantidade": 0,
+                "descricao": (
+                    f"Sobra da {rotulo_op} ({r['produto']}) - "
+                    f"a proxima OP comeca na linha de baixo"),
+                "sequencia": f"{rotulo_op} - SOBRA"})
     return expandido
 
+
 def salvar_csv(registros, caminho_saida):
-    
+    # cp1252 e ";" porque e o formato que o MasterPrint le
     with open(caminho_saida, "w", newline="", encoding="cp1252", errors="replace") as f:
-        writer = csv.DictWriter(f,
+        writer = csv.DictWriter(
+            f,
             fieldnames=["ordem", "produto", "quantidade", "descricao", "sequencia"],
             delimiter=";",
             extrasaction="ignore")
-        writer.writerows(registros)  
+        writer.writerows(registros)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -103,14 +122,20 @@ if __name__ == "__main__":
 
     caminho_pdf = sys.argv[1]
 
+    if not os.path.exists(caminho_pdf):
+        print(f"[ERRO] arquivo nao encontrado: {caminho_pdf}")
+        sys.exit(1)
+
     dados = extrair_dados_pdf(caminho_pdf)
     aaa, bbb, ccc = separar_por_marca(dados)
 
     pasta_saida = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saidas")
-    os.makedirs(pasta_saida, exist_ok = True)
-    saidas = [("AAA", aaa, os.path.join(pasta_saida, "saida_aaa.csv")),
-        ("BBB ", bbb, os.path.join(pasta_saida, "saida_bbb.csv")),
-        ("CCC ", ccc, os.path.join(pasta_saida, "saida_ccc.csv"))]
+    os.makedirs(pasta_saida, exist_ok=True)
+
+    saidas = [
+        ("AAA", aaa, os.path.join(pasta_saida, "saida_aaa.csv")),
+        ("BBB", bbb, os.path.join(pasta_saida, "saida_bbb.csv")),
+        ("CCC", ccc, os.path.join(pasta_saida, "saida_ccc.csv"))]
 
     print(f"\n{len(dados)} ordem(ns) de producao lida(s) no total\n")
     for nome, grupo, arquivo in saidas:
