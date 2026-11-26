@@ -3,6 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
 ![pdfplumber](https://img.shields.io/badge/pdfplumber-PDF-informational)
 ![Status](https://img.shields.io/badge/status-em%20uso%20na%20produção-brightgreen)
+[![Testes](https://github.com/AlanCorre475/automa-o-etiquetas-producao/actions/workflows/testes.yml/badge.svg)](https://github.com/AlanCorre475/automa-o-etiquetas-producao/actions/workflows/testes.yml)
 
 Script em Python que lê o PDF das ordens de produção (OP), junta várias OPs em uma única impressão e gera os arquivos CSV prontos para o software de etiquetas (MasterPrint).
 
@@ -20,6 +21,7 @@ Script em Python que lê o PDF das ordens de produção (OP), junta várias OPs 
 - [Tecnologias](#-tecnologias)
 - [Como rodar](#-como-rodar)
 - [Exemplo de saída](#-exemplo-de-saída)
+- [Testes](#-testes)
 - [Estrutura do projeto](#-estrutura-do-projeto)
 - [Próximos passos](#-próximos-passos)
 - [Autor](#-autor)
@@ -94,6 +96,10 @@ PDF das OPs  ──►  lê e identifica cada OP  ──►  separa por marca  �
    ```
 6. No MasterPrint, importe os CSVs e imprima.
 
+### 🖱️ Jeito mais fácil no Windows
+
+Depois de instalar a dependência (passo 3), é só **arrastar o PDF em cima do arquivo `gerar_etiquetas.bat`**. Ele roda o script e mostra o resultado, sem precisar abrir o terminal.
+
 ## 📄 Exemplo de saída
 
 Exemplo com **dados fictícios** (arquivo completo em [`exemplos/saida_aaa_exemplo.csv`](exemplos/saida_aaa_exemplo.csv)). Uma OP de 10 peças gera 10 etiquetas + 6 de sobra, para fechar 2 linhas de 8:
@@ -107,14 +113,25 @@ Exemplo com **dados fictícios** (arquivo completo em [`exemplos/saida_aaa_exemp
 
 Colunas: `ordem ; produto ; quantidade ; descricao ; sequencia`
 
+## 🧪 Testes
+
+O projeto tem testes automáticos que conferem a separação por marca e o cálculo das etiquetas (incluindo as sobras). Eles rodam sozinhos no GitHub a cada alteração. Para rodar no seu computador:
+
+```bash
+python -m unittest -v
+```
+
 ## 📁 Estrutura do projeto
 
 ```
 automa-o-etiquetas-producao/
-├── extrair_etiquetas.py   # script principal
-├── requirements.txt       # dependências (pdfplumber)
-├── exemplos/              # exemplo de CSV gerado (dados fictícios)
-├── .gitignore             # evita subir PDFs reais e a pasta saidas/
+├── extrair_etiquetas.py        # script principal
+├── test_extrair_etiquetas.py   # testes automáticos
+├── gerar_etiquetas.bat         # atalho: arraste o PDF em cima (Windows)
+├── requirements.txt            # dependências (pdfplumber)
+├── exemplos/                   # exemplo de CSV gerado (dados fictícios)
+├── .github/workflows/          # roda os testes no GitHub a cada alteração
+├── .gitignore                  # evita subir PDFs reais e a pasta saidas/
 └── README.md
 ```
 
@@ -124,7 +141,8 @@ automa-o-etiquetas-producao/
 
 - [ ] Ler as configurações (marcas, prefixos) de um arquivo separado, sem precisar mexer no código
 - [ ] Criar um executável (.exe) para usar sem instalar o Python
-- [ ] Adicionar testes automáticos com um PDF de exemplo
+- [x] Adicionar testes automáticos
+- [x] Atalho para rodar arrastando o PDF (Windows)
 
 ## 👤 Autor
 
